@@ -7,18 +7,17 @@ import pygame as p
 # Project
 import chess_main
 
-HEIGHT = 800
+HEIGHT = 784
 WIDTH = 1000
-BOARD_WIDTH = 800
 DIMENSION = 8
-LEFT_PADDING = 24
-TOP_PADDING = 8
-SQUARE_SIZE = (BOARD_WIDTH - LEFT_PADDING - TOP_PADDING) // DIMENSION
+PADDING = 8
+BOARD_HEIGHT = HEIGHT - (2 * PADDING)
+SQUARE_SIZE = BOARD_HEIGHT // DIMENSION
 MAX_FPS = 60
 IMAGES = {}
 
 BACKGROUND_COLOR = p.Color("#312e2b")
-TEXT_COLOR = p.Color("#989695")
+TEXT_COLOR = p.Color("#000000")
 LIGHT_BOX_COLOR = p.Color("#f1d9b5")
 DARK_BOX_COLOR = p.Color("#b58863")
 
@@ -34,77 +33,98 @@ def load_images():
 
 def draw_board(screen, board):
     colors = [LIGHT_BOX_COLOR, DARK_BOX_COLOR]
-    FONT = p.font.SysFont("Times New Roman", 20)
+    FONT_SIZE = 15
+    FONT = p.font.SysFont("freesansbold", FONT_SIZE)
     for rank, file in itertools.product(range(DIMENSION), range(DIMENSION)):
         # Box
         box = (
             p.Rect(
-                (file * SQUARE_SIZE) + LEFT_PADDING,
-                (rank * SQUARE_SIZE) + TOP_PADDING,
+                (file * SQUARE_SIZE) + PADDING,
+                (rank * SQUARE_SIZE) + PADDING,
                 SQUARE_SIZE,
                 SQUARE_SIZE,
             ),
         )
+
+        # Border Radius
+        top_left_radius = (
+            top_right_radius
+        ) = bottom_left_radius = bottom_right_radius = -1
+        new_radius = 4
+        if rank == 0:
+            if file == 0:
+                top_left_radius = new_radius
+            elif file == 7:
+                top_right_radius = new_radius
+        elif rank == 7:
+            if file == 0:
+                bottom_left_radius = new_radius
+            elif file == 7:
+                bottom_right_radius = new_radius
+
         # Draw board
         color = colors[((rank + file) % 2)]
-        p.draw.rect(screen, color, box)
+        p.draw.rect(
+            screen,
+            color,
+            box,
+            border_top_left_radius=top_left_radius,
+            border_top_right_radius=top_right_radius,
+            border_bottom_left_radius=bottom_left_radius,
+            border_bottom_right_radius=bottom_right_radius,
+        )
+
         # Draw Pieces
         piece = board[rank][file]
         if piece != "--":
             screen.blit(IMAGES.get(piece), box)
 
         # Draw Ranks Name
-        # if rank == 7:
-        #     letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
-        #     txt = FONT.render(letters[rank], True, TEXT_COLOR)
-        #     screen.blit(
-        #         txt,
-        #         p.Rect(
-        #             ((file * SQUARE_SIZE) + LEFT_PADDING),
-        #             776 + TOP_PADDING,
-        #             SQUARE_SIZE,
-        #             SQUARE_SIZE,
-        #         ),
-        #     )
+        if rank == 7:
+            letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
+            txt = FONT.render(letters[file], True, TEXT_COLOR)
+            screen.blit(
+                txt,
+                (
+                    (file * SQUARE_SIZE) + SQUARE_SIZE / 2 + PADDING,
+                    (rank * SQUARE_SIZE) + SQUARE_SIZE - (FONT_SIZE / 15),
+                ),
+            )
+
         # Draw Files Name
-
-
-def draw_index(screen):
-    FONT = p.font.SysFont("Times New Roman", 20)
-    start = LEFT_PADDING + (SQUARE_SIZE / 2) - DIMENSION
-    increment = SQUARE_SIZE
-
-    for letter in ["a", "b", "c", "d", "e", "f", "g", "h"]:
-        txt = FONT.render(letter, True, TEXT_COLOR)
-        screen.blit(txt, (start, 776))
-        start += increment
-
-    start = TOP_PADDING + (SQUARE_SIZE / 2) - DIMENSION
-    for num in range(8, 0, -1):
-        txt = FONT.render(str(num), True, TEXT_COLOR)
-        screen.blit(txt, (6, start))
-        start += increment
-
-
-def draw_game_state(screen, game_state):
-    draw_board(screen, game_state.board)
-    draw_index(screen)
+        if file == 0:
+            nums = list(map(str, range(8, 0, -1)))
+            txt = FONT.render(nums[rank], True, TEXT_COLOR)
+            screen.blit(
+                txt,
+                (
+                    (file * SQUARE_SIZE) + PADDING + (FONT_SIZE / 15),
+                    (rank * SQUARE_SIZE) + SQUARE_SIZE / 2,
+                ),
+            )
 
 
 def main():
+    # Intializing
     p.init()
     screen = p.display.set_mode((WIDTH, HEIGHT))
     clock = p.time.Clock()
     screen.fill(BACKGROUND_COLOR)
+
+    # Making chess board
     game_state = chess_main.GameState()
     load_images()
-    draw_game_state(screen, game_state)
+    draw_board(screen, game_state.board)
+
+    # Running Game
     running = True
     while running:
         for event in p.event.get():
             if event.type == p.QUIT:
                 running = False
-
+            elif event.type == p.MOUSEBUTTONDOWN and event.button == 1:
+                square_clicked = tuple(map(lambda x: x // SQUARE_SIZE, event.pos))
+                print(square_clicked)
         clock.tick(MAX_FPS)
         p.display.flip()
 
