@@ -12,3 +12,9 @@ class GameState:
         ]
         self.white_to_move = True
         self.move_log = []
+
+    def make_move(self, move):
+        self.board[move.start_row][move.start_col] = "--"
+        self.board[move.end_row][move.end_col] = move.piece_moved
+        self.move_log.append(move)
+        self.white_to_move = not self.white_to_move
