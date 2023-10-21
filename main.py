@@ -14,7 +14,6 @@ DIMENSION = 8
 PADDING = 12
 BOARD_WIDTH = BOARD_HEIGHT = HEIGHT - (2 * PADDING)
 SQUARE_SIZE = BOARD_HEIGHT // DIMENSION
-print(SQUARE_SIZE)
 MAX_FPS = 60
 IMAGES = {}
 
@@ -48,16 +47,14 @@ def draw_board(screen, game_state):
         top_left_radius = (
             top_right_radius
         ) = bottom_left_radius = bottom_right_radius = -1
-        if row == 0:
-            if col == 0:
-                top_left_radius = new_radius
-            elif col == 7:
-                top_right_radius = new_radius
-        elif row == 7:
-            if col == 0:
-                bottom_left_radius = new_radius
-            elif col == 7:
-                bottom_right_radius = new_radius
+        if row == 0 and col == 0:
+            top_left_radius = new_radius
+        elif row == 0 and col == 7:
+            top_right_radius = new_radius
+        elif row == 7 and col == 0:
+            bottom_left_radius = new_radius
+        elif row == 7 and col == 7:
+            bottom_right_radius = new_radius
 
         # Draw board
         color = colors[((row + col) % 2)]
@@ -122,6 +119,11 @@ def main():
 
     # Making chess board
     game_state = state.GameState()
+
+    # All Valid moves
+    valid_moves = game_state.get_valid_moves()
+    move_made = False
+
     load_images()
     # Keeping Track of moves
     selected_square = ()
@@ -130,26 +132,42 @@ def main():
     running = True
     while running:
         for event in p.event.get():
+            # Quit
             if event.type == p.QUIT:
                 running = False
+            # Make Move
             elif event.type == p.MOUSEBUTTONDOWN and event.button == 1:
-                print(event.pos)
+                # Fetch Mouse Click Position
                 col, row = tuple(map(lambda x: (x - PADDING) // SQUARE_SIZE, event.pos))
-                print(col, row)
+                # Check if poisition already pressed or not
                 if selected_square == (row, col):
                     selected_square = ()
                     player_clicked = []
                 else:
                     selected_square = (row, col)
                     player_clicked.append(selected_square)
+                # If two different valid position, move the piece
                 if len(player_clicked) == 2:
                     move = moves.Move(
                         player_clicked[0], player_clicked[1], game_state.board
                     )
-                    print(move.get_chess_notation())
-                    game_state.make_move(move)
+                    move.get_chess_notation()
+
+                    if move in valid_moves:
+                        game_state.make_move(move)
+                        move_made = True
+
                     selected_square = ()
                     player_clicked = []
+            # Undo Move
+            elif event.type == p.KEYDOWN and event.key == p.K_z:
+                game_state.undo_move()
+                move_made = True
+
+        if move_made:
+            valid_moves = game_state.get_valid_moves()
+            move_made = False
+
         draw_board(screen, game_state)
         clock.tick(MAX_FPS)
         p.display.flip()
