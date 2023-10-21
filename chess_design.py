@@ -11,12 +11,13 @@ HEIGHT = 784
 WIDTH = 1000
 DIMENSION = 8
 PADDING = 8
-BOARD_HEIGHT = HEIGHT - (2 * PADDING)
+BOARD_WIDTH = BOARD_HEIGHT = HEIGHT - (2 * PADDING)
 SQUARE_SIZE = BOARD_HEIGHT // DIMENSION
 MAX_FPS = 60
 IMAGES = {}
 
 BACKGROUND_COLOR = p.Color("#312e2b")
+STATS_BOARD_COLOR = p.Color("#000000")
 TEXT_COLOR = p.Color("#000000")
 LIGHT_BOX_COLOR = p.Color("#f1d9b5")
 DARK_BOX_COLOR = p.Color("#b58863")
@@ -35,6 +36,7 @@ def draw_board(screen, board):
     colors = [LIGHT_BOX_COLOR, DARK_BOX_COLOR]
     FONT_SIZE = 15
     FONT = p.font.SysFont("freesansbold", FONT_SIZE)
+    new_radius = 4
     for rank, file in itertools.product(range(DIMENSION), range(DIMENSION)):
         # Box
         box = (
@@ -50,7 +52,6 @@ def draw_board(screen, board):
         top_left_radius = (
             top_right_radius
         ) = bottom_left_radius = bottom_right_radius = -1
-        new_radius = 4
         if rank == 0:
             if file == 0:
                 top_left_radius = new_radius
@@ -102,6 +103,17 @@ def draw_board(screen, board):
                     (rank * SQUARE_SIZE) + SQUARE_SIZE / 2,
                 ),
             )
+    p.draw.rect(
+        screen,
+        STATS_BOARD_COLOR,
+        p.Rect(
+            BOARD_WIDTH + 2 * PADDING,
+            PADDING,
+            WIDTH - BOARD_WIDTH - 3 * PADDING,
+            BOARD_HEIGHT,
+        ),
+        border_radius=new_radius,
+    )
 
 
 def main():
