@@ -156,9 +156,11 @@ def main():
                     if move in valid_moves:
                         game_state.make_move(move)
                         move_made = True
+                        selected_square = ()
+                        player_clicked = []
+                    else:
+                        player_clicked = [selected_square]
 
-                    selected_square = ()
-                    player_clicked = []
             # Undo Move
             elif event.type == p.KEYDOWN and event.key == p.K_z:
                 game_state.undo_move()

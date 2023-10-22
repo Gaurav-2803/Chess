@@ -109,13 +109,65 @@ class GameState:
                     break
 
     def get_knight_moves(self, row, col, moves):
-        pass
+        row_col_move = [
+            (1, 2),
+            (2, 1),
+            (-1, -2),
+            (-2, -1),
+            (-1, 2),
+            (1, -2),
+            (-2, 1),
+            (2, -1),
+        ]
+        ally = "w" if self.white_to_move else "b"
+        for m in row_col_move:
+            end_row = row + m[0]
+            end_col = col + m[1]
+            if 0 <= end_row <= 7 and 0 <= end_col <= 7:
+                next_piece = self.board[end_row][end_col]
+                if next_piece[0] != ally:
+                    moves.append(Move((row, col), (end_row, end_col), self.board))
 
     def get_bishop_moves(self, row, col, moves):
-        pass
+        row_col_direction = [(-1, 1), (1, -1), (1, 1), (-1, -1)]
+        enemy = "b" if self.white_to_move else "w"
+        for direction in row_col_direction:
+            for i in range(1, 8):
+                end_row = row + direction[0] * i
+                end_col = col + direction[1] * i
+
+                if 0 <= end_row <= 7 and 0 <= end_col <= 7:
+                    next_piece = self.board[end_row][end_col]
+                    if next_piece == "--":
+                        moves.append(Move((row, col), (end_row, end_col), self.board))
+                    elif next_piece[0] == enemy:
+                        moves.append(Move((row, col), (end_row, end_col), self.board))
+                        break
+                    else:
+                        break
+                else:
+                    break
 
     def get_queen_moves(self, row, col, moves):
-        pass
+        self.get_rook_moves(row, col, moves)
+        self.get_bishop_moves(row, col, moves)
 
     def get_king_moves(self, row, col, moves):
-        pass
+        row_col_move = [
+            (1, 0),
+            (0, 1),
+            (-1, 0),
+            (0, -1),
+            (-1, 1),
+            (1, 1),
+            (1, 1),
+            (-1, -1),
+        ]
+        ally = "w" if self.white_to_move else "b"
+        for m in row_col_move:
+            end_row = row + m[0]
+            end_col = col + m[1]
+            if 0 <= end_row <= 7 and 0 <= end_col <= 7:
+                next_piece = self.board[end_row][end_col]
+                if next_piece[0] != ally:
+                    moves.append(Move((row, col), (end_row, end_col), self.board))
