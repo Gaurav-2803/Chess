@@ -177,7 +177,7 @@ class GameState:
                 piece_color, piece_type = list(end_piece)
                 if piece_color == enemy_color and piece_type == "N":
                     in_check = True
-                    checks.append(end_row, end_col, m[0], m[1])
+                    checks.append((end_row, end_col, m[0], m[1]))
 
         return in_check, pins, checks
 
